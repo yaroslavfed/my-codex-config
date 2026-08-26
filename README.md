@@ -9,16 +9,23 @@
 ```text
 my-codex-config/
 ├── AGENTS.md
+├── .codex/
+│   └── config.example.toml
 └── skills/
     ├── adversarial-review/
-    │   └── SKILL.md
+    ├── branch-report/
     ├── bug-hunt/
-    │   └── SKILL.md
     ├── code-review/
-    │   └── SKILL.md
+    ├── codebase-design/
+    ├── differential-review/
+    ├── grilling/
     ├── implementation-final-review/
-    │   └── SKILL.md
-    └── nestjs-review/
+    ├── learning-mode/
+    ├── nestjs-review/
+    ├── systematic-debugging/
+    ├── task-investigation/
+    ├── verification-before-completion/
+    └── zoom-out/
         └── SKILL.md
 ```
 
@@ -274,11 +281,20 @@ Get-ChildItem "$HOME\.codex\skills" -Recurse -Filter SKILL.md -Force |
 В ответе должны присутствовать твои skills, например:
 
 ```text
+adversarial-review
+branch-report
 bug-hunt
 code-review
-nestjs-review
-adversarial-review
+codebase-design
+differential-review
+grilling
 implementation-final-review
+learning-mode
+nestjs-review
+systematic-debugging
+task-investigation
+verification-before-completion
+zoom-out
 ```
 
 Для проверки `AGENTS.md`:
@@ -319,7 +335,7 @@ WebStorm
 url = "http://127.0.0.1:<PORT>/stream"
 ```
 
-Порт лучше не задавать вручную — используй Auto-Configuration WebStorm.
+Порт лучше не задавать вручную — используй Auto-Configuration WebStorm. Файл `.codex/config.example.toml` в этом репозитории служит только примером и **не должен заменять** локальный `~/.codex/config.toml`: порт MCP локален для конкретной установки IDE и может измениться после переустановки или перенастройки WebStorm.
 
 Расположение файла:
 
@@ -473,19 +489,30 @@ Private Git repository
         ▼
 ~/Documents/my-codex-config
 ├── AGENTS.md
+├── .codex/config.example.toml
 └── skills/*
         │
         │ symbolic links
         ▼
 ~/.codex
 ├── AGENTS.md
+├── config.toml              ← локальный, создаётся Auto-Configuration WebStorm
 └── skills/
     ├── .system/
-    ├── code-review
     ├── adversarial-review
+    ├── branch-report
     ├── bug-hunt
+    ├── code-review
+    ├── codebase-design
+    ├── differential-review
+    ├── grilling
     ├── implementation-final-review
-    └── nestjs-review
+    ├── learning-mode
+    ├── nestjs-review
+    ├── systematic-debugging
+    ├── task-investigation
+    ├── verification-before-completion
+    └── zoom-out
         │
         ▼
       Codex
@@ -495,4 +522,4 @@ Private Git repository
         └── WebStorm MCP
 ```
 
-Главное правило: **source of truth — приватный Git-репозиторий `my-codex-config`; директория `~/.codex` содержит ссылки и системные данные Codex.**
+Главное правило: **source of truth — Git-репозиторий `my-codex-config`; директория `~/.codex` содержит ссылки и системные данные Codex.**

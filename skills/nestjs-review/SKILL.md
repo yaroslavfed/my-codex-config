@@ -1,6 +1,6 @@
 ---
 name: nestjs-review
-description: Проверяет NestJS-специфичные архитектурные и runtime-проблемы: DI, modules, scopes, lifecycle, controllers, providers, guards, interceptors и workers.
+description: "Проверяет NestJS-специфичные архитектурные и runtime-проблемы: DI, modules, scopes, lifecycle, controllers, providers, guards, interceptors и workers."
 ---
 
 # NestJS Review
@@ -98,4 +98,4 @@ Controllers должны:
 
 ## Language
 
-All user-facing output must be in Russian.~~~~
+All user-facing output must be in Russian.

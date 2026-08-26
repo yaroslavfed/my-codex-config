@@ -1,0 +1,7 @@
+# Пример конфигурации WebStorm MCP.
+# Не копируй локальный порт между машинами.
+# Включи MCP Server и Clients Auto-Configuration в WebStorm,
+# после чего IDE сама добавит актуальный endpoint в ~/.codex/config.toml.
+
+[mcp_servers.webstorm]
+url = "http://127.0.0.1:<PORT>/stream"

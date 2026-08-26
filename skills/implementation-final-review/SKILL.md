@@ -1,6 +1,6 @@
 ---
 name: implementation-final-review
-description: Финальная проверка законченной реализации перед MR/merge: полный diff, контракты, тесты, runtime-поведение и regression coverage.
+description: "Финальная проверка законченной реализации перед MR/merge: полный diff, контракты, тесты, runtime-поведение и regression coverage."
 ---
 
 # Implementation Final Review
