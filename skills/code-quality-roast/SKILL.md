@@ -1,3 +1,8 @@
+---
+name: code-quality-roast
+description: Review code for duplication, conflicting scenarios, maintainability problems, clean-code violations, architectural smells, unnecessary complexity, and other code-quality issues. Produce a constructive technical roast with sharp but professional humor, while prioritizing actionable engineering feedback over jokes.
+---
+
 # code-quality-roast
 
 ## Purpose
