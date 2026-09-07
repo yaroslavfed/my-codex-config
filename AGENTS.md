@@ -135,14 +135,20 @@
 
 ## Работа с WebStorm MCP
 
-- если доступен WebStorm MCP, используй его как основной источник семантической информации о коде
-- для поиска usages, definitions, symbols, call hierarchy и IDE problems сначала используй WebStorm MCP, а не `grep`, `rg` или простой текстовый поиск
-- если меняется public API, provider, DTO, interface, type, event contract или repository method, обязательно проверь usages через IDE/MCP
+- если доступны WebStorm MCP-серверы, используй их как основной источник семантической информации о коде
+- `webstorm-index` используй в первую очередь для semantic code navigation: usages/references, definitions, symbols, classes, implementations и IDE diagnostics
+- встроенный `webstorm` MCP используй для остальных IDE-возможностей, включая Run Configurations и действия, которые отсутствуют в `webstorm-index`
+- для поиска usages, references, definitions, symbols, implementations, call hierarchy и IDE problems сначала используй MCP/IDE index, а не `grep`, `rg` или простой текстовый поиск
+- перед изменением или удалением public API, provider, DTO, interface, type, event contract, repository method или другого exported symbol обязательно проверь его usages/references через `webstorm-index`, если он доступен
+- не делай вывод, что symbol не используется, только на основании `grep`, `rg` или отсутствия текстовых совпадений, если доступен semantic search через IDE index
 - для анализа вызовов используй call hierarchy / analyze calls через MCP, если это помогает подтвердить finding
-- для проверки ошибок и предупреждений используй IDE inspections / file problems
+- для проверки ошибок и предупреждений используй IDE diagnostics / inspections / file problems
+- при анализе usages различай production code, tests, documentation и configuration, если это влияет на вывод
 - для запуска проекта, тестов, lint, build и debug предпочитай существующие WebStorm Run Configurations, если они подходят задаче
-- shell используй для Git, специализированных CLI-команд и случаев, где IDE/MCP не даёт нужной информации
+- shell используй для Git, специализированных CLI-команд, произвольного текстового поиска и случаев, где IDE/MCP не даёт нужной информации
+- `grep` и `rg` используй преимущественно для arbitrary text, конфигурации, документации, generated-файлов или как fallback, если IDE index не может разрешить symbol
 - не заменяй семантический анализ кода простым текстовым поиском, если MCP может дать более точный результат
+- при code review, investigation и refactoring используй `webstorm-index` проактивно, если вывод зависит от references, definitions, implementations или diagnostics, даже если пользователь явно не попросил использовать MCP
 - если MCP недоступен или нужного tool нет, явно сообщи об этом и используй альтернативный способ
 - при review в конце кратко перечисляй, какие IDE/MCP проверки были выполнены
 
