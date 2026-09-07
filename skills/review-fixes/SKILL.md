@@ -70,6 +70,74 @@ Do not infer that a review comment is correct merely because it sounds reasonabl
 
 If a comment is ambiguous, investigate the most likely intended concern from the surrounding code and review context. Do not invent a broader requirement than the reviewer actually raised.
 
+## Preserve Review Comment Identity
+
+The supplied review text is the source of truth for the structure of the task.
+
+Before investigation or implementation, establish a stable mapping for every original review item. That mapping must remain unchanged through investigation, Plan mode, implementation, verification, and the final response.
+
+For every original item preserve:
+
+- its original section or severity, when present;
+- its explicit number, when present;
+- its original title or a minimally shortened anchor that still identifies exactly the same comment;
+- whether it is a defect, suggestion, question, confirmation request, or explicitly marked non-defect.
+
+Do not silently rewrite the review into a new list of concerns.
+
+### Never invent new review comments
+
+Do NOT create a new numbered or standalone review comment from:
+
+- the reviewer's explanation or reproduction steps;
+- the reviewer's suggested fix;
+- consequences described inside a comment;
+- implementation details discovered during investigation;
+- subpoints that merely explain one original concern;
+- contextual notes;
+- questions or confirmation points explicitly described as "not a defect";
+- conclusions invented by the agent while planning the fix.
+
+A new independently numbered item is allowed only when the user's supplied review already contains an independently numbered item, or when the user explicitly asks to split comments.
+
+If an original comment contains several meaningful subproblems, address them inside the response to that same original comment. Do not promote them into new top-level comments.
+
+### Preserve semantic type
+
+If the reviewer explicitly says that something is "not a defect", "for confirmation", "a question", "a note", or equivalent, preserve that classification.
+
+Do not relabel such an item as "Исправлено", "Не исправлено", or another defect-resolution status unless investigation establishes a separate defect and the user asked to treat newly discovered defects as additional review items.
+
+For confirmation-only points, use wording such as:
+
+- "Подтверждено."
+- "Не подтверждено."
+- "Поведение соответствует текущему решению."
+- "Требует уточнения контракта."
+
+Keep them under the original contextual section rather than adding them to the numbered defect list.
+
+### Stable mapping across Plan and Implementation
+
+If a Plan response is produced before implementation, every later implementation result must use the same original-item mapping.
+
+Do not renumber, rename, merge, split, or reinterpret review items between the plan and the final implementation response.
+
+The final answer must make it possible to compare the user's original review and the response item-by-item without guessing which response corresponds to which original comment.
+
+### Identity check before final response
+
+Before writing the final answer, compare the response structure against the supplied review text and verify:
+
+1. Every original review item that requires a response is represented exactly once.
+2. No response item exists without a corresponding original review item.
+3. Explicit numbers from the reviewer still refer to the same comments.
+4. Unnumbered comments have not been assigned misleading numbers that make them look like reviewer-numbered items.
+5. Notes, questions, and confirmation-only points have not been converted into defects.
+6. Titles and anchors still describe the reviewer's original concern rather than the agent's chosen implementation.
+
+If any of these checks fail, fix the response structure before answering.
+
 ## Possible Outcomes
 
 Every review comment must end in one of these outcomes.
@@ -294,7 +362,11 @@ The headings are organizational labels for the original review comments.
 
 They must not be followed by changelog-style edit lists.
 
-If the reviewer supplied explicit numbering or titles, prefer retaining those identifiers.
+If the reviewer supplied explicit numbering or titles, retain those identifiers and keep them attached to the same original comments.
+
+Do not assign fresh sequential numbering across mixed sections merely for convenience. For unnumbered bullets, use their original text as the heading anchor or label them without implying that the reviewer numbered them.
+
+When the review contains a separate section of notes, questions, confirmations, or explicitly non-defect observations, preserve that section separately in the response instead of appending those items to the defect numbering.
 
 ## Examples
 
@@ -355,5 +427,8 @@ The task is complete only when:
 - applicable fixes have been implemented when implementation is allowed;
 - relevant verification has been performed where possible;
 - no comment has been silently ignored;
+- every response item maps to exactly one supplied review item;
+- no new review items were invented from explanations, suggested fixes, implementation details, or confirmation-only notes;
+- original numbering, grouping, titles, and semantic type are preserved closely enough for one-to-one comparison;
 - the final response describes resulting behavior rather than listing edits;
 - the final response is concise enough to be useful as a review reply.
