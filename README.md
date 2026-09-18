@@ -18,6 +18,8 @@ my-codex-config/
     ├── code-review/
     ├── codebase-design/
     ├── differential-review/
+    ├── documentation-conformance-review/
+    ├── go-review/
     ├── grilling/
     ├── implementation-final-review/
     ├── learning-mode/
@@ -287,6 +289,8 @@ bug-hunt
 code-review
 codebase-design
 differential-review
+documentation-conformance-review
+go-review
 grilling
 implementation-final-review
 learning-mode
@@ -505,6 +509,8 @@ Private Git repository
     ├── code-review
     ├── codebase-design
     ├── differential-review
+    ├── documentation-conformance-review
+    ├── go-review
     ├── grilling
     ├── implementation-final-review
     ├── learning-mode
