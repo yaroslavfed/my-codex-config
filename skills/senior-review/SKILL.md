@@ -1,6 +1,6 @@
 ---
 name: senior-review
-description: Strict senior-level production pre-MR review. Use after implementation or before merge when ordinary review is insufficient. Reconstructs behavior, traces contracts across callers/readers/writers, proves branch reachability, attacks tests with mutation thought experiments, checks duplicated business knowledge, DB/I/O cost, shared test state, migrations, configuration, observability, and cleanup. Findings are classified by evidence and scope; not every finding implies an in-scope fix.
+description: Strict senior-level production pre-MR review. Use after implementation or before merge when ordinary review is insufficient. Reconstructs behavior and entity lifecycles, enumerates every production writer/creator path, traces contracts across repositories and services, proves branch reachability, attacks authorization and ownership transitions, challenges tests with mutation thought experiments, searches repository-wide for duplicated helpers/constants/predicates and deleted coverage, evaluates storage-model complexity, DB/I/O cost, shared test state, migrations, configuration, observability, and cleanup. Findings are classified by evidence and scope; not every finding implies an in-scope fix.
 ---
 
 # Senior Review
@@ -19,6 +19,10 @@ The goal is to falsify it:
 - prove that new branches and defensive checks are actually reachable;
 - challenge tests with realistic mutations;
 - inspect the cost and side effects of repeated execution;
+- enumerate every production path that can create, import, migrate, restore, or mutate the affected entity;
+- search the repository for existing implementations before accepting a new helper, constant, filter, bridge, transaction wrapper, registry, or abstraction;
+- challenge whether new persistence structures are actually needed or merely encode fields that belong to an existing aggregate;
+- compare removed tests against newly added coverage instead of assuming test count or green CI preserves behavior;
 - distinguish a real defect from a speculative improvement or unrelated debt.
 
 Assume subtle defects may exist even when:
@@ -38,12 +42,14 @@ Do not invent issues. Every finding must have concrete evidence from code, contr
 
 The mandatory review order is:
 
-1. **Behavior**
-2. **Contracts**
-3. **Reachability**
-4. **Adversarial tests**
-5. **Cost and side effects**
-6. **Cleanup and operability**
+1. **Behavior and lifecycle**
+2. **Contracts and persistence**
+3. **Security / ownership transitions**
+4. **Reachability**
+5. **Repository-wide consistency**
+6. **Adversarial tests**
+7. **Cost, architecture, and side effects**
+8. **Cleanup and operability**
 
 Do not skip later passes because earlier ones look clean.
 
@@ -59,7 +65,16 @@ Internally determine:
 - what side effects can occur;
 - what invariants must remain true;
 - what failures are acceptable;
-- what failures must be visible or fatal.
+- what failures must be visible or fatal;
+- every way the affected entity/state can come into existence.
+
+For each important entity, explicitly enumerate lifecycle entrypoints when applicable:
+
+`API create -> admin create -> import/script -> migration/backfill -> bootstrap/seed -> sync/reconciliation -> restore/legacy data -> direct repository writer`
+
+Do not assume the method changed in the diff is the only creator.
+
+If the implementation relies on an invariant such as "every bot has three configuration rows", prove which component establishes that invariant for **every** lifecycle entrypoint and when it becomes true.
 
 Build a small case matrix when useful.
 
@@ -117,6 +132,16 @@ Expand only as far as necessary to understand real behavior.
 
 For a changed method, use usages/call hierarchy when available instead of relying only on text search.
 
+For every newly introduced helper, constant, predicate, registry, adapter, transaction wrapper, stream bridge, or generic-looking utility, perform a repository-wide search for:
+
+- the same symbol name;
+- equivalent literals;
+- equivalent query/filter shapes;
+- equivalent call patterns;
+- sibling implementations with slightly different names.
+
+Do not conclude "new helper is fine" before checking whether the repository already has the abstraction or business rule.
+
 Ask:
 
 > If this value is wrong here, what is the furthest downstream consequence?
@@ -150,7 +175,11 @@ Determine explicitly:
 - whether the internal representation is canonical;
 - whether `null`, `undefined`, `''`, and whitespace mean different things;
 - whether all writers produce the same form;
-- whether all readers expect the same form.
+- whether all readers expect the same form;
+- what a missing persisted record means;
+- whether absence is a valid default state, a legacy state, or corruption;
+- whether readers can distinguish "not initialized yet" from "invalid data";
+- whether a migration/backfill is required for correctness or merely compensates for an avoidable storage design.
 
 ### Normalization ownership rule
 
@@ -168,6 +197,23 @@ Flag cases where:
 
 Do not report harmless formatting repetition as a defect unless it creates conflicting semantics, hidden assumptions, or maintainability risk.
 
+### Mandatory writer inventory
+
+For every changed persisted concept, build a compact internal table:
+
+`writer/path | preconditions | value written | transaction | can record be absent? | readers affected`
+
+Include imports, scripts, migrations, seeders, bootstrap code, repository calls, and legacy data paths.
+
+A storage invariant is not proven until every writer/creator path has been checked.
+
+Especially flag:
+
+- a new side table/collection initialized only by one create path;
+- imports or migrations that can produce the parent entity without dependent records;
+- a reader that treats missing optional/default state as corruption;
+- an invariant established asynchronously after the entity becomes externally visible.
+
 ---
 
 # Pass 4 — Semantic symmetry audit
@@ -179,6 +225,8 @@ Examples:
 - manual command vs nightly synchronization;
 - cron vs interactive command;
 - create vs update;
+- create vs import vs migration/backfill vs bootstrap;
+- freshly created entity vs legacy/imported entity;
 - reminder vs immediate notification;
 - API vs worker;
 - admin path vs ordinary user path;
@@ -255,7 +303,14 @@ Check for:
 - missing `await`;
 - `Promise` used as a boolean;
 - async work started but not observed;
-- work performed outside the intended transaction or try/catch.
+- work performed outside the intended transaction or try/catch;
+- state mutated before authorization/ownership checks complete;
+- a failed operation leaving durable partial state;
+- a read-check-write sequence where the check observes state that the same operation just created.
+
+For mutations that can fail after a write, explicitly ask:
+
+> If the method throws on the next line, what has already been persisted?
 
 For async boolean checks especially verify that the resolved boolean, not the Promise object, participates in the condition.
 
@@ -286,6 +341,26 @@ Ask:
 Duplicated business knowledge is a stronger finding than duplicated syntax.
 
 Do not demand abstraction for every repeated line. Prefer repository consistency and concrete divergence risk over abstract DRY purity.
+
+### Repository-wide duplication search
+
+When the branch adds any of the following, search the entire repository before approving it:
+
+- constants and magic numbers;
+- Mongo/SQL filters;
+- authorization predicates;
+- system-user/system-bot registries;
+- stream/iterator adapters;
+- transaction helpers;
+- batch sizes;
+- duplicate-key codes;
+- retry/backoff values;
+- identity predicates;
+- mapping helpers.
+
+Search both by symbol and by literal/structural shape. Different names do not mean different concepts.
+
+If copies have already diverged, report the concrete divergence, not only "DRY violation".
 
 ---
 
@@ -419,6 +494,17 @@ For every added or changed test determine:
 
 A passing test is not evidence that the test is useful.
 
+### Deleted / moved test coverage
+
+When production logic moves between services/files or tests are deleted:
+
+1. identify tests removed from the old location;
+2. map each removed behavioral claim to a test in the new location;
+3. verify the replacement fails when the corresponding production rule is removed;
+4. do not accept "covered elsewhere" without locating the exact assertion.
+
+A moved implementation with fewer semantic tests is a regression in review coverage even if the suite remains green.
+
 ---
 
 # Pass 13 — Mandatory mutation thought experiment
@@ -444,6 +530,11 @@ Try relevant mutations such as:
 15. Execute the scenario twice.
 16. Run the test before/after another suite.
 17. Break the real implementation hidden behind a mock.
+18. Remove a type/ownership/authorization discriminator from an existing-entity path.
+19. Make a dependent configuration record absent while the parent entity exists.
+20. Route creation through import/bootstrap/migration instead of the normal API.
+21. Delete one source-of-truth entry or add an unrecognized one.
+22. Make the operation throw immediately after its first persistence call.
 
 If the test still passes under a realistic mutation related to its claimed behavior, report the surviving mutation and the missing assertion/scenario.
 
@@ -552,6 +643,12 @@ For `down`:
 - do not invent a different historical schema.
 
 If a migration test runs `down()` against a shared e2e DB, verify the test restores the schema afterwards or uses an isolated schema/database.
+
+Also ask whether the migration is compensating for a persistence model that unnecessarily requires eager initialization.
+
+If correctness requires a backfill solely because configuration was split away from an existing aggregate, compare that design against storing optional/default fields on the aggregate itself. Do not require redesign automatically, but report avoidable migration/invariant complexity when the simpler model is consistent with repository conventions.
+
+For migration tests, verify the assertion observes a behavior the migration could actually violate. Assertions against mocks that never possessed the tested method/property are tautological and provide no protection.
 
 ---
 
@@ -669,6 +766,22 @@ Ask:
 
 Treat broad capability radius as a reason to inspect all usages before approving the change.
 
+### Ownership transition audit
+
+For create-or-complete, claim, attach, import, activation, and "existing entity" flows, trace state in this order:
+
+`state before call -> first write -> authorization/ownership check -> later writes -> externally visible result`
+
+Verify that:
+
+- authorization is based on pre-existing trusted state, not state just initialized from caller input;
+- an unowned/legacy/imported entity cannot be claimed merely by supplying an owner identifier;
+- insert-only defaults do not turn attacker-controlled input into authoritative ownership;
+- forbidden operations leave no durable mutation;
+- owner/system identity rules are enforced before secrets, webhooks, permissions, or external side effects are changed.
+
+A check performed after the operation has established the condition it checks is not a valid security check.
+
 ---
 
 # Pass 23 — Object spread and merge audit
@@ -708,9 +821,195 @@ When applicable inspect:
 - transaction boundaries;
 - worker idempotency;
 - cron overlap;
-- repeated repository calls.
+- repeated repository calls;
+- one domain capability split across old and new services without a clear boundary;
+- controllers depending on multiple services for one aggregate because behavior was only partially moved;
+- loss of an existing assembler/mapper causing rereads after create/get/update;
+- repository methods added only to support an avoidable transaction/storage shape.
 
 Use the dedicated `nestjs-review` skill for a deeper NestJS-specific pass when relevant.
+
+---
+
+
+# Pass 25 — Entity lifecycle completeness
+
+This is a mandatory pass for entities whose persistence shape or initialization changes.
+
+Enumerate all ways the entity can appear in production:
+
+- public API;
+- internal API/gRPC;
+- import scripts;
+- CLI/admin scripts;
+- migrations/backfills;
+- seeds/bootstrap;
+- synchronization;
+- restore/replay;
+- legacy rows/documents already present;
+- tests/fixtures only as secondary evidence.
+
+For each path answer:
+
+- Does it create the same dependent state?
+- Does it establish ownership the same way?
+- Does it use the same defaults?
+- Is the entity visible before initialization completes?
+- Can readers observe a partially initialized entity?
+- What happens if deployment skips an intermediate version?
+
+### Upgrade-path rule
+
+Always consider supported upgrade paths, not only "old version -> immediately previous version -> new version".
+
+If a data invariant depends on a migration from an intermediate release, test or reason about installations that jump directly from an older release to the target release.
+
+A valid historical entity must not become corrupt merely because it missed application-level initialization that did not exist when it was created.
+
+---
+
+# Pass 26 — Aggregate and persistence-model challenge
+
+When the branch introduces a new collection/table/configuration store for data that belongs to an existing entity, challenge the model before reviewing only its implementation.
+
+Ask:
+
+- Does the parent entity already provide the natural identity and lifecycle?
+- Are these values one-to-one with the parent?
+- Are they always read together with the parent?
+- Does the new store require eager default rows/documents?
+- Does absence require special error handling or migrations?
+- Does the split introduce transactions solely to keep two records consistent?
+- Does it create multiple encodings of "empty"?
+- Does it add repositories/services that are mostly pass-through?
+- Does the repository already store similar fields directly on the aggregate?
+
+Compare:
+
+`fields/subdocument on existing aggregate`
+
+against
+
+`separate EAV/config table/collection`
+
+Do not prescribe one universally. Report the architectural cost when the new model creates invariants, migrations, transactions, failure modes, or hundreds of lines of plumbing without an observed independent lifecycle or query requirement.
+
+### Default-by-absence rule
+
+For optional configuration, consider whether missing data can safely mean the domain default.
+
+Do not automatically treat an absent configuration record as corruption if the business state can be represented without materializing a row/document.
+
+---
+
+# Pass 27 — Source-of-truth audit
+
+For any registry, allowlist, denylist, capability list, system identity list, enum mirror, or protocol constant:
+
+1. locate every definition in the current repository;
+2. search sibling repositories/modules when the branch explicitly mirrors another component's contract and those sources are available;
+3. identify the authoritative owner;
+4. verify each copied entry is actually provisioned/created somewhere;
+5. verify consumers agree on semantics.
+
+Flag:
+
+- two independent lists controlling authorization;
+- an entry that exists only in the new branch;
+- comments/docs naming a different source of truth;
+- a local list that can silently drift from the provisioning system.
+
+For security-relevant registries, duplicated ownership of truth is a correctness issue, not merely cleanup.
+
+---
+
+# Pass 28 — Responsibility and move-completeness audit
+
+When logic is moved from one service/class/module to another, review the **move as a unit**, not only the new method.
+
+Map related operations for the same aggregate:
+
+`create | get | update | disable/delete | assemble/map | validate | authorize`
+
+Ask:
+
+- Did only half of one responsibility move?
+- Does the controller now coordinate two services for one domain capability?
+- Did the move lose access to an existing mapper/assembler and introduce rereads?
+- Are there now duplicate validation/identity rules across both services?
+- Would completing or reverting the move make the boundary clearer and cheaper?
+
+Do not demand large refactors for aesthetics. Report split responsibility when it causes concrete duplication, extra I/O, inconsistent rules, or awkward orchestration introduced by the MR.
+
+---
+
+# Pass 29 — Partial side-effect and failure-atomicity audit
+
+For every mutating request, write the side effects in exact order:
+
+`read -> write A -> external call -> check -> write B -> response`
+
+Then inject failure after each step.
+
+Verify:
+
+- unauthorized/conflicting requests do not persist state;
+- a later `INTERNAL`, `ALREADY_EXISTS`, `FORBIDDEN`, or validation error does not leave earlier writes behind;
+- related writes are either in one transaction or safely idempotent/recoverable;
+- methods named as one logical operation are failure-atomic from the caller's perspective when required.
+
+Special attention:
+
+- "set value, then validate";
+- "initialize defaults, then check ownership";
+- "write config, then discover parent is invalid";
+- external side effects inside a DB transaction;
+- state changes before permission checks.
+
+---
+
+# Pass 30 — Exact behavior / style-convention scan
+
+Before reporting style or convention issues, inspect repository precedent quantitatively enough to avoid arbitrary preferences.
+
+Check newly introduced code against nearby dominant conventions for:
+
+- braces around `if`;
+- naming of booleans and protocol fields;
+- aliasing generated types;
+- error mapping;
+- constants vs literals;
+- batching;
+- helper placement.
+
+Only report style when:
+
+- a formatter/linter does not already settle it; and
+- the new code materially increases inconsistency or obscures correctness.
+
+Prefer grouping many identical low-level occurrences into one finding instead of flooding the review.
+
+---
+
+# Pass 31 — Reviewer-style final sweep
+
+Before `CLEAN`, perform a final search-driven sweep independent of the implementation author's structure.
+
+Search for:
+
+- each new constant's literal value;
+- each new Mongo/SQL predicate shape;
+- each new helper's semantic equivalent;
+- each new system identity name;
+- each moved method's old tests;
+- every call to the changed repository/service method;
+- every creator/importer of the affected entity;
+- every reader of newly persisted fields;
+- every error string that signals supposedly impossible/corrupt state.
+
+The goal is to catch facts that are invisible when reading files in the order they were changed.
+
+Do not stop at the diff if a repository-wide search can falsify an assumption cheaply.
 
 ---
 
@@ -809,7 +1108,13 @@ Prefer concrete evidence:
 - destructive shared-state cleanup;
 - mismatched migration `down`;
 - missing env declaration;
-- contradictory production paths.
+- contradictory production paths;
+- lifecycle path missing required initialization;
+- pre-write vs post-write ownership state;
+- repository-wide duplicate helper/constant/filter evidence;
+- deleted test with no equivalent replacement;
+- source-of-truth mismatch across components;
+- avoidable persistence invariant introduced by storage shape.
 
 Avoid vague statements such as:
 
@@ -853,25 +1158,36 @@ If unrelated local/dev tests are known to fail while CI or the target environmen
 Do not return `CLEAN` until all applicable checks are satisfied:
 
 - [ ] Intended behavior reconstructed.
+- [ ] Every production creator/importer/migration/bootstrap path for affected entities enumerated.
 - [ ] Relevant callers/callees/usages inspected.
-- [ ] Writer -> storage -> reader contracts traced for changed values.
+- [ ] Every writer -> storage -> reader contract traced for changed persisted values.
+- [ ] Missing-record/default/legacy semantics explicitly checked.
 - [ ] Nullable/optional/empty/whitespace semantics checked where relevant.
-- [ ] Related production paths compared for semantic consistency.
+- [ ] Create/import/migration/legacy paths compared for semantic consistency.
+- [ ] Ownership/authorization checks evaluated against state **before** the operation mutates it.
+- [ ] Failure injected mentally after each significant side effect; no forbidden partial persistence remains.
 - [ ] New guards/branches/fallbacks proven reachable or justified.
 - [ ] No important dead/unreachable code remains.
+- [ ] Repository-wide search performed for equivalent helpers/constants/filters/registries introduced by the MR.
 - [ ] No duplicated business knowledge with divergence risk remains.
-- [ ] DB/external calls checked for repeated work and bad loop placement.
+- [ ] Security-relevant registries/source-of-truth definitions were checked for drift.
+- [ ] New persistence structures challenged against the existing aggregate/default-by-absence model where applicable.
+- [ ] Service/class responsibility remains coherent after moved logic.
+- [ ] DB/external calls checked for repeated work and unnecessary rereads.
 - [ ] Repeated writes checked for write amplification.
 - [ ] Transaction/lock semantics inspected where relevant.
-- [ ] Important tests challenged with realistic mutations.
-- [ ] Assertions prove the behavior named by the tests.
+- [ ] Removed/moved tests mapped to replacement behavioral coverage.
+- [ ] Important tests challenged with realistic mutations, including type/ownership discriminators and missing dependent records.
+- [ ] Assertions prove the behavior named by the tests rather than mock topology.
 - [ ] Mocks do not hide the implementation under test.
 - [ ] Shared e2e/integration state is restored and isolated.
-- [ ] Migrations were checked in both directions.
+- [ ] Migrations were checked in both directions and against skipped-version upgrade paths where relevant.
+- [ ] Migration tests actually exercise behavior that can fail.
 - [ ] New config values have a complete deployment lifecycle.
 - [ ] Removed features have no unsafe dead config/secrets/docs.
 - [ ] Degraded behavior is diagnosable where necessary.
 - [ ] User-visible formatting is consistent across equivalent paths.
+- [ ] Final reviewer-style repository search sweep completed.
 - [ ] Findings were classified as fix-now vs pre-existing/out-of-scope/speculative.
 - [ ] No meaningful issue from the adversarial pass remains.
 
@@ -914,16 +1230,18 @@ After findings include:
 
 Briefly state which relevant areas were actually inspected:
 
-- behavior;
-- production execution paths;
-- contracts;
+- behavior and entity lifecycle;
+- production execution paths, including imports/scripts/migrations;
+- contracts and all persistence writers/readers;
+- ownership/authorization transitions and failure atomicity;
 - reachability;
-- tests and mutations;
+- repository-wide duplication/source-of-truth search;
+- tests, deleted coverage, and mutations;
 - mocks;
-- persistence/I/O;
-- migrations/config when applicable;
+- persistence model and I/O;
+- migrations/config and upgrade paths when applicable;
 - operability;
-- architecture.
+- architecture and service responsibility.
 
 Do not dump internal chain-of-thought.
 
