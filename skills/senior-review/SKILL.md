@@ -61,6 +61,7 @@ Internally determine:
 
 - what behavior is introduced, removed, or changed;
 - what existing behavior must remain unchanged;
+- which **negative guarantees** must remain true (what must still be impossible or forbidden);
 - which actors and execution paths are affected;
 - what side effects can occur;
 - what invariants must remain true;
@@ -71,6 +72,8 @@ Internally determine:
 For each important entity, explicitly enumerate lifecycle entrypoints when applicable:
 
 `API create -> admin create -> import/script -> migration/backfill -> bootstrap/seed -> sync/reconciliation -> restore/legacy data -> direct repository writer`
+
+Also enumerate creation paths that are not user-facing today but are callable internally. A missing current UI/consumer does not make an authorization hole harmless if the backend contract already permits the unsafe state.
 
 Do not assume the method changed in the diff is the only creator.
 
@@ -225,6 +228,9 @@ Examples:
 - manual command vs nightly synchronization;
 - cron vs interactive command;
 - create vs update;
+- create vs "complete existing";
+- ordinary bot vs reserved/system identity;
+- user-owned create vs system/bootstrap create;
 - create vs import vs migration/backfill vs bootstrap;
 - freshly created entity vs legacy/imported entity;
 - reminder vs immediate notification;
@@ -505,6 +511,18 @@ When production logic moves between services/files or tests are deleted:
 
 A moved implementation with fewer semantic tests is a regression in review coverage even if the suite remains green.
 
+Do not compare only tests adjacent to the changed method. Search deleted/modified tests for every removed behavioral claim, including:
+
+- not-found behavior;
+- type discrimination;
+- ownership conflicts;
+- reserved-name rejection;
+- already-disabled/already-existing behavior;
+- invalid legacy state;
+- error mapping.
+
+For each removed guard in production code, identify the test that would fail if that guard disappeared. If none exists, report the exact surviving mutation.
+
 ---
 
 # Pass 13 — Mandatory mutation thought experiment
@@ -535,6 +553,11 @@ Try relevant mutations such as:
 20. Route creation through import/bootstrap/migration instead of the normal API.
 21. Delete one source-of-truth entry or add an unrecognized one.
 22. Make the operation throw immediately after its first persistence call.
+23. Remove the not-found/null guard and let execution continue with a missing entity.
+24. Allow a user-owned create to use a reserved/system identifier.
+25. Replace a neutral test fixture username with a reserved/system one and check whether the test accidentally proves the wrong policy.
+26. Replace a local handwritten type with the generated contract type and see whether any real semantic distinction remains.
+27. Remove read-time validation for data written only through a canonical writer and check whether any reachable behavior changes.
 
 If the test still passes under a realistic mutation related to its claimed behavior, report the surviving mutation and the missing assertion/scenario.
 
@@ -782,6 +805,19 @@ Verify that:
 
 A check performed after the operation has established the condition it checks is not a valid security check.
 
+### Reserved identity / namespace audit
+
+When authorization or trust is derived from a well-known username, slug, email, service account name, system bot name, route, tenant key, or other reserved identifier:
+
+- locate where reservation is enforced;
+- verify user-controlled creation cannot claim the reserved identifier first;
+- verify removal of an old `is_system`, `reserved`, or similar field did not also remove the only protection;
+- distinguish "who marks the entity system" from "who prevents ordinary users from occupying the system namespace";
+- inspect bootstrap/ensure logic that finds an entity by identifier and may trust an already-existing record;
+- verify tests use neutral identities unless the behavior under test is specifically about reserved/system identities.
+
+Treat the namespace itself as an authorization boundary when downstream components infer trust from the identifier.
+
 ---
 
 # Pass 23 — Object spread and merge audit
@@ -991,6 +1027,107 @@ Prefer grouping many identical low-level occurrences into one finding instead of
 
 ---
 
+
+# Pass 31 — Generated contract and local-type duplication audit
+
+When protobuf/OpenAPI/GraphQL/codegen/generated SDK types exist, search for handwritten local types that mirror them.
+
+For each local DTO/type/interface ask:
+
+- Is it structurally identical to a generated contract?
+- Does it add domain semantics, narrowing, branding, validation, or internal-only fields?
+- Is it intentionally decoupled from the transport contract?
+- Or is it only a field-for-field duplicate?
+
+Flag field-for-field duplicates when they create drift risk without adding meaning.
+
+Especially inspect:
+
+- bot/user configuration types;
+- command/button structures;
+- enums;
+- request/response payloads;
+- nested transport models.
+
+Prefer the generated contract when the code already treats that contract as the canonical shape and neighboring types are imported from generated code.
+
+Do not recommend generated transport types deep inside the domain automatically. The finding requires concrete evidence that the local type has no independent semantics and duplicates the authoritative contract.
+
+---
+
+# Pass 32 — Read-time validation reachability audit
+
+Validation is not automatically valuable merely because persisted data is being read.
+
+For every read-time validator ask:
+
+1. Who can write the field?
+2. Do all production writers already validate/normalize it?
+3. Can legacy/migration/manual/admin paths bypass those writers?
+4. Can the persisted representation become stale or malformed independently?
+5. Is the validator checking an actually reachable bad state?
+6. What happens if the validator is deleted?
+
+If the only writer stores canonical data and no alternate/legacy writer can create the rejected state, classify the read-time validation as unreachable/redundant rather than defensive correctness.
+
+Pay special attention to validators that turn impossible states into `INTERNAL`, because they create failure branches, tests, and operational noise for states the system cannot actually produce.
+
+Do not remove read validation when the database is shared, manually edited, written by older versions, or otherwise has independent writers. Prove writer exclusivity first.
+
+---
+
+# Pass 33 — Refactor residue and orphaned artifact audit
+
+After moving/removing/renaming code, inspect the semantic neighborhood for residue:
+
+- comments now attached to a different constant/method;
+- stale JSDoc;
+- test names describing deleted behavior;
+- fixtures using names with special semantics;
+- imports left only for old structure;
+- obsolete aliases;
+- comments referring to removed batching/page-size behavior;
+- docs/examples whose referenced symbol no longer exists.
+
+### Comment attachment rule
+
+A comment is part of the code contract. After deleting/moving the line it described, verify the comment still describes the immediately following construct.
+
+Do not dismiss misleading comments as cosmetic when they actively describe the wrong constant, limit, unit, ownership rule, or behavior.
+
+### Semantic fixture rule
+
+Test data is not neutral when values carry production meaning.
+
+Check fixture usernames, IDs, roles, system names, reserved identifiers, sentinel values, and error codes. A test for an ordinary imported bot must not accidentally use a system/reserved bot identity unless that distinction is the subject of the test.
+
+---
+
+# Pass 34 — Negative guarantee preservation audit
+
+For every removed field, guard, validation, registry, or branch, ask:
+
+> What bad state did this code make impossible?
+
+Then locate where that guarantee lives after the refactor.
+
+Examples:
+
+- removing `is_system` may also remove reserved-name protection;
+- moving `createBot` may lose "username occupied by person" rejection;
+- deleting an update method may lose not-found behavior;
+- removing an EAV validator may be safe only if the storage model makes the state impossible.
+
+Build a small mapping:
+
+`removed protection -> protected bad state -> new enforcement point -> test that proves it`
+
+If no new enforcement point exists, report a regression even if the removed mechanism itself was intentionally deleted.
+
+This pass is mandatory for refactors that simplify models or move responsibilities across services/repositories.
+
+---
+
 # Pass 31 — Reviewer-style final sweep
 
 Before `CLEAN`, perform a final search-driven sweep independent of the implementation author's structure.
@@ -1005,7 +1142,12 @@ Search for:
 - every call to the changed repository/service method;
 - every creator/importer of the affected entity;
 - every reader of newly persisted fields;
-- every error string that signals supposedly impossible/corrupt state.
+- every error string that signals supposedly impossible/corrupt state;
+- every deleted guard and its replacement enforcement point;
+- every reserved/system identifier and who can create it;
+- handwritten types structurally matching generated contracts;
+- comments adjacent to removed/moved constants;
+- fixtures using values with special production semantics.
 
 The goal is to catch facts that are invisible when reading files in the order they were changed.
 
@@ -1114,6 +1256,13 @@ Prefer concrete evidence:
 - repository-wide duplicate helper/constant/filter evidence;
 - deleted test with no equivalent replacement;
 - source-of-truth mismatch across components;
+- reserved namespace can be claimed before trusted bootstrap;
+- deleted guard with no replacement enforcement point;
+- handwritten type identical to generated contract;
+- surviving null/not-found mutation;
+- misleading orphaned comment;
+- semantically special test fixture used as ordinary data;
+- unreachable read-time validation;
 - avoidable persistence invariant introduced by storage shape.
 
 Avoid vague statements such as:
@@ -1165,6 +1314,8 @@ Do not return `CLEAN` until all applicable checks are satisfied:
 - [ ] Nullable/optional/empty/whitespace semantics checked where relevant.
 - [ ] Create/import/migration/legacy paths compared for semantic consistency.
 - [ ] Ownership/authorization checks evaluated against state **before** the operation mutates it.
+- [ ] Reserved/system namespaces checked for user-controlled preemption where downstream trust depends on identifier.
+- [ ] Every removed protection mapped to its replacement enforcement point and preserving test.
 - [ ] Failure injected mentally after each significant side effect; no forbidden partial persistence remains.
 - [ ] New guards/branches/fallbacks proven reachable or justified.
 - [ ] No important dead/unreachable code remains.
@@ -1172,12 +1323,15 @@ Do not return `CLEAN` until all applicable checks are satisfied:
 - [ ] No duplicated business knowledge with divergence risk remains.
 - [ ] Security-relevant registries/source-of-truth definitions were checked for drift.
 - [ ] New persistence structures challenged against the existing aggregate/default-by-absence model where applicable.
+- [ ] Handwritten DTO/types checked against generated contracts for field-for-field duplication.
+- [ ] Read-time validation proven reachable from at least one real writer/legacy path.
 - [ ] Service/class responsibility remains coherent after moved logic.
 - [ ] DB/external calls checked for repeated work and unnecessary rereads.
 - [ ] Repeated writes checked for write amplification.
 - [ ] Transaction/lock semantics inspected where relevant.
-- [ ] Removed/moved tests mapped to replacement behavioral coverage.
-- [ ] Important tests challenged with realistic mutations, including type/ownership discriminators and missing dependent records.
+- [ ] Removed/moved tests mapped claim-by-claim to replacement behavioral coverage, including not-found and negative cases.
+- [ ] Test fixtures checked for accidental use of reserved/system/sentinel values.
+- [ ] Important tests challenged with realistic mutations, including type/ownership discriminators, missing dependent records, and removed null/not-found guards.
 - [ ] Assertions prove the behavior named by the tests rather than mock topology.
 - [ ] Mocks do not hide the implementation under test.
 - [ ] Shared e2e/integration state is restored and isolated.
@@ -1185,6 +1339,7 @@ Do not return `CLEAN` until all applicable checks are satisfied:
 - [ ] Migration tests actually exercise behavior that can fail.
 - [ ] New config values have a complete deployment lifecycle.
 - [ ] Removed features have no unsafe dead config/secrets/docs.
+- [ ] Comments/JSDoc/test names around moved/deleted code still describe the construct they are attached to.
 - [ ] Degraded behavior is diagnosable where necessary.
 - [ ] User-visible formatting is consistent across equivalent paths.
 - [ ] Final reviewer-style repository search sweep completed.
