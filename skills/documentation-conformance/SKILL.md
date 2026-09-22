@@ -1,4 +1,4 @@
-# Documentation Conformance Review
+# Documentation Conformance
 
 ## Purpose
 
@@ -667,7 +667,7 @@ Dedicated language/framework review skills should handle ordinary code-style con
 
 Use this structure.
 
-# Documentation Conformance Review
+# Documentation Conformance
 
 ## Summary
 
