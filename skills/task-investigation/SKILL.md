@@ -23,6 +23,8 @@ During investigation, do not modify source code, tests, configuration, migration
 
 Reading commands and non-mutating diagnostics are allowed.
 
+Если доступен [project-memory](../project-memory/SKILL.md), используй заметку репозитория как карту входов и зависимостей, сверяя важные сведения с кодом. Запись подтверждённого долговечного знания в отдельную папку памяти допустима и не считается изменением исследуемого проекта.
+
 Do not fix unrelated problems discovered during investigation.
 
 ## Process

@@ -40,6 +40,8 @@ Before changing anything:
 
 Inspect only context that can plausibly affect the symptom:
 
+Если доступен [project-memory](../project-memory/SKILL.md), проверь заметку затронутого репозитория на известные ограничения и связи. Сверяй их с текущим кодом; после расследования обнови только подтверждённый долговечный вывод о причинах или устройстве.
+
 - current diff
 - recent relevant commits
 - dependency changes
