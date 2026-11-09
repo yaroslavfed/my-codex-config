@@ -1,12 +1,15 @@
 ---
 name: grilling
-description: Use when the user wants to stress-test a plan, architecture, decision, or idea before implementation. Resolve the decision tree one dependency-aware question at a time and provide a recommended answer for every question.
-disable-model-invocation: true
+description: Use only when the user explicitly asks to stress-test a plan, architecture, decision, or idea before implementation. Resolve open decisions one question at a time and recommend an answer for each.
 ---
 
 # Grilling
 
 Interview the user until important design decisions are explicit and there are no material silent assumptions.
+
+Use this skill when implementation depends on a material decision about business intent, priorities, or constraints that the repository cannot answer. The result is a set of agreed decisions, not code. Skip it when requirements are already clear or the task is ordinary implementation, debugging, or review.
+
+`task-investigation` discovers how the existing system works. `grilling` resolves choices only the user can make. `codebase-design` compares implementation designs once the relevant requirements are known.
 
 ## Rules
 
