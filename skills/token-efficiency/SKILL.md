@@ -165,7 +165,7 @@ For failures, preserve the relevant error details needed for diagnosis.
 
 ## 9. Reviews and investigations
 
-For review, debugging, bug-hunt, and investigation tasks:
+For review, debugging, and investigation tasks:
 
 - search from the reported behavior or changed code outward
 - prioritize executable paths and actual usages
@@ -181,8 +181,6 @@ Do not reduce review depth merely to reduce output. Reduce irrelevant exploratio
 This skill modifies another workflow rather than replacing it.
 
 Examples:
-
-`$bug-hunt $token-efficiency`
 
 `$code-review $token-efficiency`
 

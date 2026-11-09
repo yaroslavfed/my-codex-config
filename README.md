@@ -12,20 +12,16 @@ my-codex-config/
 ├── .codex/
 │   └── config.example.toml
 └── skills/
-    ├── adversarial-review/
     ├── branch-report/
-    ├── bug-hunt/
     ├── code-review/
     ├── codebase-design/
-    ├── differential-review/
-    ├── documentation-conformance-review/
-    ├── go-review/
     ├── grilling/
-    ├── implementation-final-review/
     ├── learning-mode/
-    ├── nestjs-review/
+    ├── review-fixes/
+    ├── senior-review/
     ├── systematic-debugging/
     ├── task-investigation/
+    ├── token-efficiency/
     ├── verification-before-completion/
     └── zoom-out/
         └── SKILL.md
@@ -78,18 +74,18 @@ mkdir -p ~/.codex/skills
 
 ## 2.3. Подключение AGENTS.md
 
-Если файл уже существует, сохрани резервную копию:
+Если по целевому пути уже лежит другой файл или ссылка, сохрани его вручную под свободным именем и повтори команду:
 
 ```bash
-if [ -e ~/.codex/AGENTS.md ] || [ -L ~/.codex/AGENTS.md ]; then
-  mv ~/.codex/AGENTS.md ~/.codex/AGENTS.md.backup
+agents_source="$HOME/Documents/my-codex-config/AGENTS.md"
+agents_target="$HOME/.codex/AGENTS.md"
+if [ -L "$agents_target" ] && [ "$(readlink "$agents_target")" = "$agents_source" ]; then
+  :
+elif [ -e "$agents_target" ] || [ -L "$agents_target" ]; then
+  printf 'Путь занят: %s\n' "$agents_target" >&2
+else
+  ln -s "$agents_source" "$agents_target"
 fi
-```
-
-Создай ссылку:
-
-```bash
-ln -s ~/Documents/my-codex-config/AGENTS.md ~/.codex/AGENTS.md
 ```
 
 ## 2.4. Подключение всех пользовательских skills
@@ -97,11 +93,19 @@ ln -s ~/Documents/my-codex-config/AGENTS.md ~/.codex/AGENTS.md
 ```bash
 for skill in ~/Documents/my-codex-config/skills/*; do
   [ -d "$skill" ] || continue
-  name="$(basename "$skill")"
-  rm -rf "$HOME/.codex/skills/$name"
-  ln -s "$skill" "$HOME/.codex/skills/$name"
+  skill_target="$HOME/.codex/skills/$(basename "$skill")"
+  if [ -L "$skill_target" ] && [ "$(readlink "$skill_target")" = "$skill" ]; then
+    continue
+  fi
+  if [ -e "$skill_target" ] || [ -L "$skill_target" ]; then
+    printf 'Путь занят: %s\n' "$skill_target" >&2
+    continue
+  fi
+  ln -s "$skill" "$skill_target"
 done
 ```
+
+При сообщении о занятом пути проверь его содержимое и перенеси вручную под свободным именем, если хочешь заменить его ссылкой
 
 ## 2.5. Проверка
 
@@ -138,11 +142,15 @@ mkdir -p ~/.codex/skills
 ## 3.3. Подключение AGENTS.md
 
 ```bash
-if [ -e ~/.codex/AGENTS.md ] || [ -L ~/.codex/AGENTS.md ]; then
-  mv ~/.codex/AGENTS.md ~/.codex/AGENTS.md.backup
+agents_source="$HOME/Documents/my-codex-config/AGENTS.md"
+agents_target="$HOME/.codex/AGENTS.md"
+if [ -L "$agents_target" ] && [ "$(readlink "$agents_target")" = "$agents_source" ]; then
+  :
+elif [ -e "$agents_target" ] || [ -L "$agents_target" ]; then
+  printf 'Путь занят: %s\n' "$agents_target" >&2
+else
+  ln -s "$agents_source" "$agents_target"
 fi
-
-ln -s ~/Documents/my-codex-config/AGENTS.md ~/.codex/AGENTS.md
 ```
 
 ## 3.4. Подключение skills
@@ -150,11 +158,19 @@ ln -s ~/Documents/my-codex-config/AGENTS.md ~/.codex/AGENTS.md
 ```bash
 for skill in ~/Documents/my-codex-config/skills/*; do
   [ -d "$skill" ] || continue
-  name="$(basename "$skill")"
-  rm -rf "$HOME/.codex/skills/$name"
-  ln -s "$skill" "$HOME/.codex/skills/$name"
+  skill_target="$HOME/.codex/skills/$(basename "$skill")"
+  if [ -L "$skill_target" ] && [ "$(readlink "$skill_target")" = "$skill" ]; then
+    continue
+  fi
+  if [ -e "$skill_target" ] || [ -L "$skill_target" ]; then
+    printf 'Путь занят: %s\n' "$skill_target" >&2
+    continue
+  fi
+  ln -s "$skill" "$skill_target"
 done
 ```
+
+При сообщении о занятом пути проверь его содержимое и перенеси вручную под свободным именем, если хочешь заменить его ссылкой
 
 ## 3.5. Проверка
 
@@ -226,17 +242,18 @@ Settings
 ## 4.4. Подключение AGENTS.md
 
 ```powershell
-$agents = "$HOME\.codex\AGENTS.md"
+$agentsSource = "$HOME\Documents\my-codex-config\AGENTS.md"
+$agentsTarget = "$HOME\.codex\AGENTS.md"
+$existingAgents = Get-Item -LiteralPath $agentsTarget -Force -ErrorAction SilentlyContinue
 
-if (Test-Path $agents) {
-    Move-Item $agents "$HOME\.codex\AGENTS.md.backup" -Force
+if ($null -eq $existingAgents) {
+    New-Item -ItemType SymbolicLink -Path $agentsTarget -Target $agentsSource | Out-Null
+} elseif ($existingAgents.LinkType -ne 'SymbolicLink' -or $existingAgents.Target -ne $agentsSource) {
+    Write-Warning "Путь занят: $agentsTarget"
 }
-
-New-Item `
-  -ItemType SymbolicLink `
-  -Path "$HOME\.codex\AGENTS.md" `
-  -Target "$HOME\Documents\my-codex-config\AGENTS.md"
 ```
+
+При сообщении о занятом пути сохрани существующий файл или ссылку вручную под свободным именем и повтори команду
 
 ## 4.5. Подключение всех skills
 
@@ -246,17 +263,17 @@ $target = "$HOME\.codex\skills"
 
 Get-ChildItem $source -Directory | ForEach-Object {
     $link = Join-Path $target $_.Name
+    $existingLink = Get-Item -LiteralPath $link -Force -ErrorAction SilentlyContinue
 
-    if (Test-Path $link) {
-        Remove-Item $link -Recurse -Force
+    if ($null -eq $existingLink) {
+        New-Item -ItemType SymbolicLink -Path $link -Target $_.FullName | Out-Null
+    } elseif ($existingLink.LinkType -ne 'SymbolicLink' -or $existingLink.Target -ne $_.FullName) {
+        Write-Warning "Путь занят: $link"
     }
-
-    New-Item `
-      -ItemType SymbolicLink `
-      -Path $link `
-      -Target $_.FullName | Out-Null
 }
 ```
+
+При сообщении о занятом пути проверь содержимое и перенеси его вручную под свободным именем, если хочешь заменить ссылкой
 
 ## 4.6. Проверка
 
@@ -283,20 +300,16 @@ Get-ChildItem "$HOME\.codex\skills" -Recurse -Filter SKILL.md -Force |
 В ответе должны присутствовать твои skills, например:
 
 ```text
-adversarial-review
 branch-report
-bug-hunt
 code-review
 codebase-design
-differential-review
-documentation-conformance-review
-go-review
 grilling
-implementation-final-review
 learning-mode
-nestjs-review
+review-fixes
+senior-review
 systematic-debugging
 task-investigation
+token-efficiency
 verification-before-completion
 zoom-out
 ```
@@ -308,6 +321,20 @@ zoom-out
 ```
 
 Если в `AGENTS.md` задан русский язык, Codex должен это подтвердить.
+
+## Как выбирать skills
+
+В репозитории 12 пользовательских skills. Для review нужны только три:
+
+- `code-review` — обычное ревью корректности и качества кода, дублирования, шаблонного кода, применимости GRASP, SOLID и GoF, а также достаточности unit, integration и e2e тестов для бизнес-требований. Проверяет, что тесты действительно выявляют поломку поведения и не фиксируют историю изменений вместо функциональности
+- `senior-review` — строгое ревью: включает `code-review`, поднимает доступную инфраструктуру в контейнерах и проверяет фичу сквозными сценариями по бизнес-требованиям
+- `review-fixes` — разбирает замечания ревью, проверяет их обоснованность, исправляет подтверждённые проблемы по запросу и готовит ответы
+
+Остальные skills выбирай по задаче: `zoom-out` и `task-investigation` для изучения системы; `grilling` и `codebase-design` для решений по требованиям и архитектуре; `systematic-debugging` для расследования дефектов; `learning-mode` для учебной работы; `verification-before-completion` для проверки результата; `token-efficiency` для экономии контекста; `branch-report` для текста MR и Redmine.
+
+`branch-report` выдаёт название и описание MR отдельно для каждого затронутого репозитория, а для всей задачи — один текст Redmine без раздела «Как проверить». Skill не создаёт MR и не публикует эти тексты.
+
+Общее правило `AGENTS.md` требует сомневаться в собственных решениях и выводах, искать подтверждения и контрпримеры в требованиях, контрактах, коде и тестах и явно обозначать неопределённость при недостатке доказательств.
 
 ---
 
@@ -406,6 +433,8 @@ git pull
 
 Если добавлен **новый** skill, нужно создать symlink для него. Самый простой вариант — повторно выполнить цикл подключения skills для своей ОС.
 
+Если skill удалён из репозитория, его прежняя ссылка в `~/.codex/skills` не исчезнет автоматически. Удаляй только эту ссылку после проверки, что она указывает на удалённый каталог данного репозитория.
+
 ---
 
 # 8. Быстрое восстановление — Linux/macOS
@@ -417,17 +446,27 @@ git clone <URL_ПРИВАТНОГО_РЕПОЗИТОРИЯ> my-codex-config
 
 mkdir -p ~/.codex/skills
 
-if [ -e ~/.codex/AGENTS.md ] || [ -L ~/.codex/AGENTS.md ]; then
-  mv ~/.codex/AGENTS.md ~/.codex/AGENTS.md.backup
+agents_source="$HOME/Documents/my-codex-config/AGENTS.md"
+agents_target="$HOME/.codex/AGENTS.md"
+if [ -L "$agents_target" ] && [ "$(readlink "$agents_target")" = "$agents_source" ]; then
+  :
+elif [ -e "$agents_target" ] || [ -L "$agents_target" ]; then
+  printf 'Путь занят: %s\n' "$agents_target" >&2
+else
+  ln -s "$agents_source" "$agents_target"
 fi
-
-ln -s ~/Documents/my-codex-config/AGENTS.md ~/.codex/AGENTS.md
 
 for skill in ~/Documents/my-codex-config/skills/*; do
   [ -d "$skill" ] || continue
-  name="$(basename "$skill")"
-  rm -rf "$HOME/.codex/skills/$name"
-  ln -s "$skill" "$HOME/.codex/skills/$name"
+  skill_target="$HOME/.codex/skills/$(basename "$skill")"
+  if [ -L "$skill_target" ] && [ "$(readlink "$skill_target")" = "$skill" ]; then
+    continue
+  fi
+  if [ -e "$skill_target" ] || [ -L "$skill_target" ]; then
+    printf 'Путь занят: %s\n' "$skill_target" >&2
+    continue
+  fi
+  ln -s "$skill" "$skill_target"
 done
 
 find -L ~/.codex/skills -maxdepth 2 -type f -name SKILL.md -print
@@ -447,31 +486,28 @@ git clone <URL_ПРИВАТНОГО_РЕПОЗИТОРИЯ> my-codex-config
 
 New-Item -ItemType Directory -Force -Path "$HOME\.codex\skills" | Out-Null
 
-$agents = "$HOME\.codex\AGENTS.md"
+$agentsSource = "$HOME\Documents\my-codex-config\AGENTS.md"
+$agentsTarget = "$HOME\.codex\AGENTS.md"
+$existingAgents = Get-Item -LiteralPath $agentsTarget -Force -ErrorAction SilentlyContinue
 
-if (Test-Path $agents) {
-    Move-Item $agents "$HOME\.codex\AGENTS.md.backup" -Force
+if ($null -eq $existingAgents) {
+    New-Item -ItemType SymbolicLink -Path $agentsTarget -Target $agentsSource | Out-Null
+} elseif ($existingAgents.LinkType -ne 'SymbolicLink' -or $existingAgents.Target -ne $agentsSource) {
+    Write-Warning "Путь занят: $agentsTarget"
 }
-
-New-Item `
-  -ItemType SymbolicLink `
-  -Path "$HOME\.codex\AGENTS.md" `
-  -Target "$HOME\Documents\my-codex-config\AGENTS.md"
 
 $source = "$HOME\Documents\my-codex-config\skills"
 $target = "$HOME\.codex\skills"
 
 Get-ChildItem $source -Directory | ForEach-Object {
     $link = Join-Path $target $_.Name
+    $existingLink = Get-Item -LiteralPath $link -Force -ErrorAction SilentlyContinue
 
-    if (Test-Path $link) {
-        Remove-Item $link -Recurse -Force
+    if ($null -eq $existingLink) {
+        New-Item -ItemType SymbolicLink -Path $link -Target $_.FullName | Out-Null
+    } elseif ($existingLink.LinkType -ne 'SymbolicLink' -or $existingLink.Target -ne $_.FullName) {
+        Write-Warning "Путь занят: $link"
     }
-
-    New-Item `
-      -ItemType SymbolicLink `
-      -Path $link `
-      -Target $_.FullName | Out-Null
 }
 
 Get-ChildItem "$HOME\.codex\skills" -Recurse -Filter SKILL.md -Force |
@@ -503,20 +539,16 @@ Private Git repository
 ├── config.toml              ← локальный, создаётся Auto-Configuration WebStorm
 └── skills/
     ├── .system/
-    ├── adversarial-review
     ├── branch-report
-    ├── bug-hunt
     ├── code-review
     ├── codebase-design
-    ├── differential-review
-    ├── documentation-conformance-review
-    ├── go-review
     ├── grilling
-    ├── implementation-final-review
     ├── learning-mode
-    ├── nestjs-review
+    ├── review-fixes
+    ├── senior-review
     ├── systematic-debugging
     ├── task-investigation
+    ├── token-efficiency
     ├── verification-before-completion
     └── zoom-out
         │

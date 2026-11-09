@@ -23,7 +23,7 @@ Use this skill for a concrete observed problem, including:
 - configuration or environment differences
 - performance regressions
 
-Do not use it merely to search for hypothetical bugs in otherwise working code; use a bug-hunt or code-review skill for that.
+Do not use it merely to search for hypothetical bugs in otherwise working code; use `code-review` for that.
 
 ## Process
 
