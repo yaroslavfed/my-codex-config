@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "53a0292a677c489b",
+        "id": "f7b9e0433ae2fc26",
         "type": "tabs",
         "children": [
           {
-            "id": "068c2118f5c6d075",
+            "id": "448bdd933594c2f3",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -181,14 +181,40 @@
       "bases:Create new base": false
     }
   },
-  "active": "068c2118f5c6d075",
+  "active": "448bdd933594c2f3",
   "lastOpenFiles": [
+    "api-gateway/api-gateway.md",
+    "Карта сервисов.md",
+    "elph-user-status/urv-work-statuses.md",
+    "elph-user-status/presence.md",
+    "elph-user-status/elph-user-status.md",
+    "elph-bot-jarvis/urv-work-statuses.md",
+    "elph-bot-jarvis/ai-requests.md",
+    "elph-bot-jarvis/elph-bot-jarvis.md",
+    "elph-bot-service/bot-tokens.md",
+    "elph-bot-service/event-routing.md",
+    "elph-bot-service/elph-bot-service.md",
+    "elph-chat-server/bot-tokens.md",
+    "elph-chat-server/inline-commands.md",
+    "elph-chat-server/messages.md",
+    "elph-chat-server/elph-chat-server.md",
+    "api-gateway/user-status.md",
+    "api-gateway/bot-auth.md",
+    "api-gateway/chat-routes.md",
+    "platform-contracts/platform-contracts.md",
+    "platform-contracts",
+    "helm-charts-elph/helm-charts-elph.md",
+    "helm-charts-elph",
+    "elph-user-status",
+    "elph-chat-server",
+    "elph-bot-service",
+    "elph-bot-jarvis",
+    "api-gateway",
     "elph-user-status.md",
     "platform-contracts.md",
     "helm-charts-elph.md",
     "elph-bot-service.md",
     "api-gateway.md",
-    "elph-chat-server.md",
-    "elph-bot-jarvis.md"
+    "elph-chat-server.md"
   ]
 }
