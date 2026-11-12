@@ -16,7 +16,8 @@
 - gRPC `ChatService.SendMessage` — отправка сообщения. Внешняя HTTP-ручка расположена в [[api-gateway]]: `POST /v1/chat.sendMessage`
 - gRPC `ChatService.RunInlineCommand` — исполнение inline-команды; внешний HTTP-вход: `POST /v1/chat.runInlineCommand`
 - gRPC `ChatService.UpdatedMessages` — дельта обновлений; внешний HTTP-вход: `GET /v1/chat.updatedMessages`
-- В `ChatBotService` есть служебные `VerifyBotToken`, `IssueBotToken`, `RotateBotToken`, `DeleteBotToken`; `BotsService` предоставляет `Create`, `Update`, `RegenerateToken` для административных маршрутов gateway
+- В `ChatBotService` сохранены служебные `VerifyBotToken`, `IssueBotToken`, `RotateBotToken`, `DeleteBotToken`; `BotsService` сохраняет `Create`, `Update`, `RegenerateToken`, хотя прямые маршруты gateway к ним в ветке `refs_550675` удалены
+- В ветке `refs_550675` добавлен `ChatBotService.ListBotTokens`: он читает `auth_services` с `service: 'bot-jwt'`, отдаёт текущий токен и последний идентификатор операции, повреждённые записи пропускает и считает в журнале без вывода токенов
 
 ## Особенности и риски
 
@@ -28,7 +29,7 @@
 ## Связи
 
 - [[api-gateway]] — публичные HTTP-маршруты преобразуются в gRPC-вызовы этого сервиса
-- [[elph-bot-service]] — получает события сообщений для маршрутизации управляемым ботам и вызывает служебные методы токенов этого сервиса
+- [[elph-bot-service]] — получает события сообщений для маршрутизации управляемым ботам и однократно выгружает токены через `ListBotTokens` при миграции PostgreSQL; прежние токенные RPC чата пока сохранены
 
 ## Источники
 
@@ -38,3 +39,4 @@
 - `src/lib/event-generators/message-event-generator.ts`, `deliverInlineCommand`, `deliverMessageEvent`, проверено в локальной ветке `develop/3.9.0` 2026-11-09
 - `src/api/authentication/token/BotTokenService.ts`, `BotTokenService`; `src/api/authentication/auth.module.ts`, `AuthModule`; `src/api/authentication/resume/ResumeAuthService.ts`, `ResumeAuthService`, проверено по `origin/develop/3.9.0` 2026-11-09
 - `src/grpc/internal.grpc.controller.ts`, `InternalGrpcController`; `src/grpc/bots.grpc.controller.ts`, `BotsGrpcController`, проверено по `origin/develop/3.9.0` 2026-11-09
+- `src/api/authentication/token/BotTokenService.ts`, `list`; `src/grpc/internal.grpc.controller.ts`, `listBotTokens`, проверено по `refs_550675` 2026-11-12

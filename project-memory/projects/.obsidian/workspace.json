@@ -11,10 +11,10 @@
             "id": "068c2118f5c6d075",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "graph",
               "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -183,10 +183,11 @@
   },
   "active": "068c2118f5c6d075",
   "lastOpenFiles": [
+    "elph-user-status.md",
+    "platform-contracts.md",
     "helm-charts-elph.md",
     "elph-bot-service.md",
     "api-gateway.md",
-    "platform-contracts.md",
     "elph-chat-server.md",
     "elph-bot-jarvis.md"
   ]
