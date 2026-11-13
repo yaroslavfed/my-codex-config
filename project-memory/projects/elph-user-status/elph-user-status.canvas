@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    { "id": "overview", "type": "file", "x": 0, "y": 180, "width": 280, "height": 180, "file": "elph-user-status/elph-user-status.md", "color": "6" },
+    { "id": "presence", "type": "file", "x": 400, "y": 0, "width": 280, "height": 180, "file": "elph-user-status/presence.md", "color": "6" },
+    { "id": "work-status", "type": "file", "x": 400, "y": 300, "width": 280, "height": 180, "file": "elph-user-status/urv-work-statuses.md", "color": "6" },
+    { "id": "gateway", "type": "file", "x": 800, "y": 0, "width": 280, "height": 180, "file": "api-gateway/api-gateway.md", "color": "5" },
+    { "id": "contracts", "type": "file", "x": 800, "y": 300, "width": 280, "height": 180, "file": "platform-contracts/platform-contracts.md", "color": "2" },
+    { "id": "postgres", "type": "text", "x": 0, "y": 500, "width": 220, "height": 100, "text": "# PostgreSQL\nElphUsers и статусы", "color": "1" },
+    { "id": "redis", "type": "text", "x": 400, "y": 600, "width": 220, "height": 100, "text": "# Redis\nСоединения и события", "color": "1" },
+    { "id": "jarvis-plan", "type": "file", "x": 800, "y": 600, "width": 280, "height": 180, "file": "elph-bot-jarvis/elph-bot-jarvis.md", "color": "2" },
+    { "id": "plan", "type": "text", "x": 40, "y": 700, "width": 260, "height": 100, "text": "# План\nРабочий статус УРВ\nВ коде ещё не реализован", "color": "6" }
+  ],
+  "edges": [
+    { "id": "overview-presence", "fromNode": "overview", "toNode": "presence", "label": "presence" },
+    { "id": "overview-work-status", "fromNode": "overview", "toNode": "work-status", "label": "рабочие статусы" },
+    { "id": "presence-gateway", "fromNode": "presence", "toNode": "gateway", "label": "gRPC и Redis-события" },
+    { "id": "presence-postgres", "fromNode": "presence", "toNode": "postgres", "label": "пользователи" },
+    { "id": "presence-redis", "fromNode": "presence", "toNode": "redis", "label": "события" },
+    { "id": "contracts-work-status", "fromNode": "contracts", "toNode": "work-status", "label": "План: расширение контрактов" },
+    { "id": "jarvis-work-status", "fromNode": "jarvis-plan", "toNode": "work-status", "label": "План: снимок УРВ" },
+    { "id": "plan-work-status", "fromNode": "plan", "toNode": "work-status", "label": "План" }
+  ]
+}

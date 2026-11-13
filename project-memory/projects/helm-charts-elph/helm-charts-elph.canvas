@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    { "id": "overview", "type": "file", "x": 0, "y": 180, "width": 280, "height": 180, "file": "helm-charts-elph/helm-charts-elph.md", "color": "1" },
+    { "id": "bot", "type": "file", "x": 400, "y": 0, "width": 280, "height": 180, "file": "elph-bot-service/elph-bot-service.md", "color": "3" },
+    { "id": "redis", "type": "text", "x": 400, "y": 280, "width": 240, "height": 100, "text": "# Redis chart\nПодписки управляемых ботов", "color": "1" },
+    { "id": "postgres", "type": "text", "x": 400, "y": 500, "width": 240, "height": 100, "text": "# PostgreSQL chart\nБаза bot_service", "color": "1" },
+    { "id": "secret", "type": "text", "x": 800, "y": 500, "width": 240, "height": 100, "text": "# Kubernetes Secret\nbot-service-secret", "color": "1" },
+    { "id": "branch", "type": "text", "x": 0, "y": 500, "width": 280, "height": 100, "text": "# Ветка refs_550675\nНастройки PostgreSQL для bot-service", "color": "2" }
+  ],
+  "edges": [
+    { "id": "overview-redis", "fromNode": "overview", "toNode": "redis", "label": "chart" },
+    { "id": "overview-postgres", "fromNode": "overview", "toNode": "postgres", "label": "chart" },
+    { "id": "redis-bot", "fromNode": "redis", "toNode": "bot", "label": "подписки" },
+    { "id": "postgres-bot", "fromNode": "postgres", "toNode": "bot", "label": "токены" },
+    { "id": "secret-bot", "fromNode": "secret", "toNode": "bot", "label": "пароль" },
+    { "id": "branch-postgres", "fromNode": "branch", "toNode": "postgres", "label": "Ветка" }
+  ]
+}

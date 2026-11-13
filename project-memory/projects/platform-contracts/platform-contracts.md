@@ -4,6 +4,10 @@
 
 Содержит gRPC-контракты сервисов и общие типы платформы.
 
+## Архитектура
+
+[[platform-contracts.canvas|Схема platform-contracts]]
+
 ## Контракты и сценарии
 
 - `elph.chat.v1.ChatBotService` в `internal.proto` сохраняет прежние токенные RPC; в ветке `refs_550675` добавлен `ListBotTokens` для разовой выгрузки токенов с последним `operation_id`

@@ -1,0 +1,27 @@
+{
+  "nodes": [
+    { "id": "gateway", "type": "file", "x": 0, "y": 180, "width": 280, "height": 180, "file": "api-gateway/api-gateway.md", "color": "5" },
+    { "id": "chat", "type": "file", "x": 400, "y": 20, "width": 280, "height": 180, "file": "elph-chat-server/elph-chat-server.md", "color": "4" },
+    { "id": "bot", "type": "file", "x": 400, "y": 260, "width": 280, "height": 180, "file": "elph-bot-service/elph-bot-service.md", "color": "3" },
+    { "id": "status", "type": "file", "x": 400, "y": 500, "width": 280, "height": 180, "file": "elph-user-status/elph-user-status.md", "color": "6" },
+    { "id": "contracts", "type": "file", "x": 800, "y": 180, "width": 280, "height": 180, "file": "platform-contracts/platform-contracts.md", "color": "2" },
+    { "id": "helm", "type": "file", "x": 800, "y": 500, "width": 280, "height": 180, "file": "helm-charts-elph/helm-charts-elph.md", "color": "1" },
+    { "id": "jarvis", "type": "file", "x": 400, "y": 740, "width": 280, "height": 180, "file": "elph-bot-jarvis/elph-bot-jarvis.md", "color": "2" },
+    { "id": "client", "type": "text", "x": -40, "y": 0, "width": 200, "height": 100, "text": "# Клиенты\nHTTP и GraphQL", "color": "5" },
+    { "id": "urv-plan", "type": "text", "x": 800, "y": 760, "width": 260, "height": 120, "text": "# План\nУрв и Redis Pub/Sub\nЦелевой поток рабочих статусов", "color": "6" }
+  ],
+  "edges": [
+    { "id": "client-gateway", "fromNode": "client", "toNode": "gateway", "fromSide": "bottom", "toSide": "top", "label": "HTTP, GraphQL" },
+    { "id": "gateway-chat", "fromNode": "gateway", "toNode": "chat", "fromSide": "top", "toSide": "left", "label": "gRPC чата" },
+    { "id": "gateway-bot", "fromNode": "gateway", "toNode": "bot", "fromSide": "right", "toSide": "left", "label": "Bot API и токены" },
+    { "id": "gateway-status", "fromNode": "gateway", "toNode": "status", "fromSide": "bottom", "toSide": "left", "label": "gRPC и события статуса" },
+    { "id": "chat-bot", "fromNode": "chat", "toNode": "bot", "fromSide": "bottom", "toSide": "top", "label": "события сообщений" },
+    { "id": "contracts-gateway", "fromNode": "contracts", "toNode": "gateway", "fromSide": "left", "toSide": "right", "label": "контракты" },
+    { "id": "contracts-chat", "fromNode": "contracts", "toNode": "chat", "fromSide": "left", "toSide": "right", "label": "контракты" },
+    { "id": "contracts-bot", "fromNode": "contracts", "toNode": "bot", "fromSide": "left", "toSide": "right", "label": "контракты" },
+    { "id": "contracts-status", "fromNode": "contracts", "toNode": "status", "fromSide": "bottom", "toSide": "right", "label": "контракты" },
+    { "id": "helm-bot", "fromNode": "helm", "toNode": "bot", "fromSide": "top", "toSide": "right", "label": "Redis и PostgreSQL" },
+    { "id": "jarvis-urv", "fromNode": "jarvis", "toNode": "urv-plan", "fromSide": "right", "toSide": "left", "label": "План: публикация снимка" },
+    { "id": "urv-status", "fromNode": "urv-plan", "toNode": "status", "fromSide": "top", "toSide": "bottom", "label": "План: рабочий статус" }
+  ]
+}

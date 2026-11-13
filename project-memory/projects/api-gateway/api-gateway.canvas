@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    { "id": "overview", "type": "file", "x": 0, "y": 180, "width": 280, "height": 180, "file": "api-gateway/api-gateway.md", "color": "5" },
+    { "id": "chat-routes", "type": "file", "x": 400, "y": 0, "width": 280, "height": 180, "file": "api-gateway/chat-routes.md", "color": "4" },
+    { "id": "bot-auth", "type": "file", "x": 400, "y": 220, "width": 280, "height": 180, "file": "api-gateway/bot-auth.md", "color": "2" },
+    { "id": "user-status", "type": "file", "x": 400, "y": 440, "width": 280, "height": 180, "file": "api-gateway/user-status.md", "color": "6" },
+    { "id": "chat", "type": "file", "x": 800, "y": 0, "width": 280, "height": 180, "file": "elph-chat-server/elph-chat-server.md", "color": "4" },
+    { "id": "bot", "type": "file", "x": 800, "y": 220, "width": 280, "height": 180, "file": "elph-bot-service/elph-bot-service.md", "color": "3" },
+    { "id": "status", "type": "file", "x": 800, "y": 440, "width": 280, "height": 180, "file": "elph-user-status/elph-user-status.md", "color": "6" },
+    { "id": "clients", "type": "text", "x": -40, "y": 0, "width": 200, "height": 100, "text": "# Клиенты\nHTTP, DDP, GraphQL", "color": "5" },
+    { "id": "branch", "type": "text", "x": 40, "y": 470, "width": 250, "height": 100, "text": "# Ветка refs_550675\nПроверка бот-токенов и статусов", "color": "2" }
+  ],
+  "edges": [
+    { "id": "clients-overview", "fromNode": "clients", "toNode": "overview", "label": "внешний вход" },
+    { "id": "overview-chat-routes", "fromNode": "overview", "toNode": "chat-routes", "label": "маршруты чата" },
+    { "id": "overview-bot-auth", "fromNode": "overview", "toNode": "bot-auth", "label": "Bot API" },
+    { "id": "overview-user-status", "fromNode": "overview", "toNode": "user-status", "label": "статусы" },
+    { "id": "chat-routes-chat", "fromNode": "chat-routes", "toNode": "chat", "label": "gRPC ChatService" },
+    { "id": "bot-auth-bot", "fromNode": "bot-auth", "toNode": "bot", "label": "gRPC BotService" },
+    { "id": "user-status-status", "fromNode": "user-status", "toNode": "status", "label": "gRPC и Redis" },
+    { "id": "branch-user-status", "fromNode": "branch", "toNode": "user-status", "label": "Ветка" }
+  ]
+}

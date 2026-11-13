@@ -2,6 +2,10 @@
 
 Сервис хранит состояния пользователей Elph, ведёт presence и отдаёт их API gateway по gRPC
 
+## Архитектура
+
+[[elph-user-status.canvas|Схема elph-user-status]]
+
 ## Темы
 
 - [[elph-user-status/presence|Presence]] — текущие состояния и доставка изменений

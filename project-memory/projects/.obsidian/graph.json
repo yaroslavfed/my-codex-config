@@ -6,7 +6,15 @@
   "hideUnresolved": false,
   "showOrphans": true,
   "collapse-color-groups": true,
-  "colorGroups": [],
+  "colorGroups": [
+    { "query": "path:\"api-gateway/\"", "color": { "a": 1, "rgb": 4316596 } },
+    { "query": "path:\"elph-chat-server/\"", "color": { "a": 1, "rgb": 3978097 } },
+    { "query": "path:\"elph-bot-service/\"", "color": { "a": 1, "rgb": 14575720 } },
+    { "query": "path:\"elph-bot-jarvis/\"", "color": { "a": 1, "rgb": 12568618 } },
+    { "query": "path:\"elph-user-status/\"", "color": { "a": 1, "rgb": 15790320 } },
+    { "query": "path:\"helm-charts-elph/\"", "color": { "a": 1, "rgb": 12736046 } },
+    { "query": "path:\"platform-contracts/\"", "color": { "a": 1, "rgb": 9250187 } }
+  ],
   "collapse-display": true,
   "showArrow": false,
   "textFadeMultiplier": 0,

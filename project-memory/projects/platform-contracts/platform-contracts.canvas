@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    { "id": "overview", "type": "file", "x": 400, "y": 180, "width": 280, "height": 180, "file": "platform-contracts/platform-contracts.md", "color": "2" },
+    { "id": "gateway", "type": "file", "x": 0, "y": 0, "width": 280, "height": 180, "file": "api-gateway/api-gateway.md", "color": "5" },
+    { "id": "chat", "type": "file", "x": 0, "y": 260, "width": 280, "height": 180, "file": "elph-chat-server/elph-chat-server.md", "color": "4" },
+    { "id": "bot", "type": "file", "x": 800, "y": 0, "width": 280, "height": 180, "file": "elph-bot-service/elph-bot-service.md", "color": "3" },
+    { "id": "status", "type": "file", "x": 800, "y": 260, "width": 280, "height": 180, "file": "elph-user-status/elph-user-status.md", "color": "6" },
+    { "id": "tokens", "type": "text", "x": 400, "y": 500, "width": 280, "height": 100, "text": "# Ветка refs_550675\nListBotTokens и VerifyBotToken", "color": "2" },
+    { "id": "work-status", "type": "text", "x": 800, "y": 550, "width": 280, "height": 100, "text": "# План\nworkStatus в gRPC и Redis\nКонтракт ещё не изменён", "color": "6" }
+  ],
+  "edges": [
+    { "id": "overview-gateway", "fromNode": "overview", "toNode": "gateway", "label": "потребитель" },
+    { "id": "overview-chat", "fromNode": "overview", "toNode": "chat", "label": "реализует ChatBotService и BotsService" },
+    { "id": "overview-bot", "fromNode": "overview", "toNode": "bot", "label": "реализует BotService" },
+    { "id": "overview-status", "fromNode": "overview", "toNode": "status", "label": "gRPC и Redis-контракты" },
+    { "id": "tokens-chat", "fromNode": "tokens", "toNode": "chat", "label": "Ветка" },
+    { "id": "tokens-bot", "fromNode": "tokens", "toNode": "bot", "label": "Ветка" },
+    { "id": "work-status-status", "fromNode": "work-status", "toNode": "status", "label": "План" }
+  ]
+}

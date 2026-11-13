@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    { "id": "overview", "type": "file", "x": 0, "y": 200, "width": 280, "height": 180, "file": "elph-chat-server/elph-chat-server.md", "color": "4" },
+    { "id": "messages", "type": "file", "x": 400, "y": 0, "width": 280, "height": 180, "file": "elph-chat-server/messages.md", "color": "4" },
+    { "id": "inline", "type": "file", "x": 400, "y": 220, "width": 280, "height": 180, "file": "elph-chat-server/inline-commands.md", "color": "4" },
+    { "id": "tokens", "type": "file", "x": 400, "y": 440, "width": 280, "height": 180, "file": "elph-chat-server/bot-tokens.md", "color": "2" },
+    { "id": "gateway", "type": "file", "x": 800, "y": 0, "width": 280, "height": 180, "file": "api-gateway/api-gateway.md", "color": "5" },
+    { "id": "bot", "type": "file", "x": 800, "y": 330, "width": 280, "height": 180, "file": "elph-bot-service/elph-bot-service.md", "color": "3" },
+    { "id": "mongo", "type": "text", "x": 0, "y": 500, "width": 200, "height": 100, "text": "# MongoDB\nauth_services", "color": "1" },
+    { "id": "branch", "type": "text", "x": 780, "y": 580, "width": 280, "height": 100, "text": "# Ветка refs_550675\nListBotTokens для миграции", "color": "2" }
+  ],
+  "edges": [
+    { "id": "gateway-messages", "fromNode": "gateway", "toNode": "messages", "label": "gRPC ChatService" },
+    { "id": "gateway-inline", "fromNode": "gateway", "toNode": "inline", "label": "gRPC ChatService" },
+    { "id": "overview-messages", "fromNode": "overview", "toNode": "messages", "label": "обработка чата" },
+    { "id": "overview-inline", "fromNode": "overview", "toNode": "inline", "label": "команды" },
+    { "id": "overview-tokens", "fromNode": "overview", "toNode": "tokens", "label": "токены" },
+    { "id": "messages-bot", "fromNode": "messages", "toNode": "bot", "label": "события сообщений" },
+    { "id": "inline-bot", "fromNode": "inline", "toNode": "bot", "label": "событие inline-команды" },
+    { "id": "tokens-mongo", "fromNode": "tokens", "toNode": "mongo", "label": "хранение" },
+    { "id": "tokens-bot", "fromNode": "tokens", "toNode": "bot", "label": "выгрузка токенов" },
+    { "id": "branch-tokens", "fromNode": "branch", "toNode": "tokens", "label": "Ветка" }
+  ]
+}

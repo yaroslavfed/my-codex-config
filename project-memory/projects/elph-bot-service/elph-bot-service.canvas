@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    { "id": "overview", "type": "file", "x": 0, "y": 180, "width": 280, "height": 180, "file": "elph-bot-service/elph-bot-service.md", "color": "3" },
+    { "id": "events", "type": "file", "x": 400, "y": 0, "width": 280, "height": 180, "file": "elph-bot-service/event-routing.md", "color": "3" },
+    { "id": "tokens", "type": "file", "x": 400, "y": 260, "width": 280, "height": 180, "file": "elph-bot-service/bot-tokens.md", "color": "2" },
+    { "id": "chat", "type": "file", "x": 800, "y": 0, "width": 280, "height": 180, "file": "elph-chat-server/elph-chat-server.md", "color": "4" },
+    { "id": "gateway", "type": "file", "x": 800, "y": 260, "width": 280, "height": 180, "file": "api-gateway/api-gateway.md", "color": "5" },
+    { "id": "postgres", "type": "text", "x": 400, "y": 560, "width": 220, "height": 100, "text": "# PostgreSQL\nТокены ботов", "color": "1" },
+    { "id": "redis", "type": "text", "x": 800, "y": 560, "width": 220, "height": 100, "text": "# Redis\nПодписки ботов", "color": "1" },
+    { "id": "branch", "type": "text", "x": 0, "y": 500, "width": 280, "height": 100, "text": "# Ветка refs_550675\nЛокальное хранение токенов", "color": "2" }
+  ],
+  "edges": [
+    { "id": "overview-events", "fromNode": "overview", "toNode": "events", "label": "входящие события" },
+    { "id": "overview-tokens", "fromNode": "overview", "toNode": "tokens", "label": "управление токенами" },
+    { "id": "chat-events", "fromNode": "chat", "toNode": "events", "label": "события сообщений" },
+    { "id": "gateway-events", "fromNode": "gateway", "toNode": "events", "label": "регистрация подписки" },
+    { "id": "gateway-tokens", "fromNode": "gateway", "toNode": "tokens", "label": "VerifyBotToken" },
+    { "id": "tokens-postgres", "fromNode": "tokens", "toNode": "postgres", "label": "хранение" },
+    { "id": "events-redis", "fromNode": "events", "toNode": "redis", "label": "подписки" },
+    { "id": "branch-tokens", "fromNode": "branch", "toNode": "tokens", "label": "Ветка" }
+  ]
+}
