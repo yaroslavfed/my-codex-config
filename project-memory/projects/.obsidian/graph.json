@@ -7,13 +7,41 @@
   "showOrphans": true,
   "collapse-color-groups": true,
   "colorGroups": [
-    { "query": "path:\"api-gateway/\"", "color": { "a": 1, "rgb": 4316596 } },
-    { "query": "path:\"elph-chat-server/\"", "color": { "a": 1, "rgb": 3978097 } },
-    { "query": "path:\"elph-bot-service/\"", "color": { "a": 1, "rgb": 14575720 } },
-    { "query": "path:\"elph-bot-jarvis/\"", "color": { "a": 1, "rgb": 12568618 } },
-    { "query": "path:\"elph-user-status/\"", "color": { "a": 1, "rgb": 15790320 } },
-    { "query": "path:\"helm-charts-elph/\"", "color": { "a": 1, "rgb": 12736046 } },
-    { "query": "path:\"platform-contracts/\"", "color": { "a": 1, "rgb": 9250187 } }
+    {
+      "query": "[type:architecture]",
+      "color": {
+        "a": 1,
+        "rgb": 16763904
+      }
+    },
+    {
+      "query": "[type:service]",
+      "color": {
+        "a": 1,
+        "rgb": 4286945
+      }
+    },
+    {
+      "query": "[type:module]",
+      "color": {
+        "a": 1,
+        "rgb": 3050327
+      }
+    },
+    {
+      "query": "[type:infrastructure]",
+      "color": {
+        "a": 1,
+        "rgb": 9662683
+      }
+    },
+    {
+      "query": "[type:contract]",
+      "color": {
+        "a": 1,
+        "rgb": 15965202
+      }
+    }
   ],
   "collapse-display": true,
   "showArrow": false,

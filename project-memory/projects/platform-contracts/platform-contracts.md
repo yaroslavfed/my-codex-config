@@ -1,3 +1,7 @@
+---
+type: contract
+---
+
 # platform-contracts
 
 ## Назначение

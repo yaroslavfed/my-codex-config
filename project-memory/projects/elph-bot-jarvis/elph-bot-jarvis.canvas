@@ -1,21 +1,21 @@
 {
-  "nodes": [
-    { "id": "overview", "type": "file", "x": 0, "y": 180, "width": 280, "height": 180, "file": "elph-bot-jarvis/elph-bot-jarvis.md", "color": "2" },
-    { "id": "ai", "type": "file", "x": 400, "y": 0, "width": 280, "height": 180, "file": "elph-bot-jarvis/ai-requests.md", "color": "2" },
-    { "id": "urv", "type": "file", "x": 400, "y": 320, "width": 280, "height": 180, "file": "elph-bot-jarvis/urv-work-statuses.md", "color": "2" },
-    { "id": "ai-service", "type": "text", "x": 800, "y": 0, "width": 240, "height": 100, "text": "# Внешний ИИ\nПотоковый gRPC", "color": "5" },
-    { "id": "urv-system", "type": "text", "x": 800, "y": 260, "width": 240, "height": 100, "text": "# УРВ\nДневные данные сотрудников", "color": "6" },
-    { "id": "status", "type": "file", "x": 800, "y": 500, "width": 280, "height": 180, "file": "elph-user-status/elph-user-status.md", "color": "6" },
-    { "id": "redis-plan", "type": "text", "x": 400, "y": 620, "width": 280, "height": 100, "text": "# План\nRedis Pub/Sub\nurv.work-statuses.snapshot.v1", "color": "6" },
-    { "id": "branch", "type": "text", "x": 0, "y": 510, "width": 280, "height": 100, "text": "# Ветка refs_556137\nОпрос УРВ и публикация снимка", "color": "2" }
-  ],
-  "edges": [
-    { "id": "overview-ai", "fromNode": "overview", "toNode": "ai", "label": "запросы к ИИ" },
-    { "id": "overview-urv", "fromNode": "overview", "toNode": "urv", "label": "рабочие статусы" },
-    { "id": "ai-service-edge", "fromNode": "ai", "toNode": "ai-service", "label": "ExecuteTask" },
-    { "id": "urv-system-edge", "fromNode": "urv", "toNode": "urv-system", "label": "опрос" },
-    { "id": "urv-redis", "fromNode": "urv", "toNode": "redis-plan", "label": "План: полный снимок" },
-    { "id": "redis-status", "fromNode": "redis-plan", "toNode": "status", "label": "План: потребитель" },
-    { "id": "branch-urv", "fromNode": "branch", "toNode": "urv", "label": "Ветка" }
-  ]
+	"nodes":[
+		{"id":"overview","type":"file","x":0,"y":180,"width":280,"height":180,"file":"elph-bot-jarvis/elph-bot-jarvis.md","color":"#4169E1"},
+		{"id":"ai","type":"file","x":400,"y":0,"width":280,"height":180,"file":"elph-bot-jarvis/ai-requests.md","color":"#2E8B57"},
+		{"id":"urv","type":"file","x":400,"y":320,"width":280,"height":180,"file":"elph-bot-jarvis/urv-work-statuses.md","color":"#2E8B57"},
+		{"id":"ai-service","type":"text","x":800,"y":0,"width":240,"height":100,"text":"Внешний ИИ\nПотоковый gRPC","color":"#F39C12"},
+		{"id":"urv-system","type":"text","x":800,"y":260,"width":240,"height":100,"text":"УРВ\nДневные данные сотрудников"},
+		{"id":"status","type":"file","x":800,"y":500,"width":280,"height":180,"file":"elph-user-status/elph-user-status.md","color":"#4169E1"},
+		{"id":"redis-plan","type":"text","x":400,"y":620,"width":280,"height":100,"text":"План\nRedis Pub/Sub\nurv.work-statuses.snapshot.v1","color":"#9370DB"},
+		{"id":"branch","type":"text","x":0,"y":510,"width":280,"height":100,"text":"Ветка refs_556137\nОпрос УРВ и публикация снимка"}
+	],
+	"edges":[
+		{"id":"overview-ai","fromNode":"overview","toNode":"ai","label":"запросы к ИИ","fromSide":"right","toSide":"left"},
+		{"id":"overview-urv","fromNode":"overview","toNode":"urv","label":"рабочие статусы","fromSide":"right","toSide":"left"},
+		{"id":"ai-service-edge","fromNode":"ai","toNode":"ai-service","label":"ExecuteTask","fromSide":"right","toSide":"left"},
+		{"id":"urv-system-edge","fromNode":"urv","toNode":"urv-system","label":"опрос","fromSide":"right","toSide":"left"},
+		{"id":"urv-redis","fromNode":"urv","toNode":"redis-plan","label":"План: полный снимок","fromSide":"bottom","toSide":"top"},
+		{"id":"redis-status","fromNode":"redis-plan","toNode":"status","label":"План: потребитель","fromSide":"right","toSide":"left"},
+		{"id":"branch-urv","fromNode":"branch","toNode":"urv","label":"Ветка","fromSide":"top","toSide":"left"}
+	]
 }

@@ -1,3 +1,7 @@
+---
+type: service
+---
+
 # elph-chat-server
 
 Сервис хранения и обработки чата

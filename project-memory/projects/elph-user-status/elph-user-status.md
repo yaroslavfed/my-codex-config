@@ -1,3 +1,7 @@
+---
+type: service
+---
+
 # elph-user-status
 
 Сервис хранит состояния пользователей Elph, ведёт presence и отдаёт их API gateway по gRPC

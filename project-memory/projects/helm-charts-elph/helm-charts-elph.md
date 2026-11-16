@@ -1,3 +1,7 @@
+---
+type: infrastructure
+---
+
 # helm-charts-elph
 
 ## Назначение
