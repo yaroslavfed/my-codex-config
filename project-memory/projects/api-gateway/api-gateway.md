@@ -13,6 +13,7 @@ type: service
 ## Темы
 
 - [[api-gateway/chat-routes|Маршруты чата]] — отправка сообщений, inline-команды и получение обновлений
+- [[api-gateway/avatars|Аватары]] — маршруты /elph_chat/avatar/*, прокси в file-service, кросс-доменные правила
 - [[api-gateway/bot-auth|Боты и аутентификация]] — бот-токены, Bot API и маршруты управления
 - [[api-gateway/user-status|Статусы пользователей]] — GraphQL-снимок и подписка
 

@@ -4,24 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "f7b9e0433ae2fc26",
+        "id": "2ac7ff3e9ddadb1b",
         "type": "tabs",
         "children": [
           {
-            "id": "448bdd933594c2f3",
+            "id": "33259f6d2a8e1958",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "architecture/Платформа.canvas",
-                "viewState": {
-                  "x": 635.6586538461538,
-                  "y": 391.5680964543269,
-                  "zoom": -0.5138794026596736
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "Платформа"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -188,10 +181,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "448bdd933594c2f3",
+  "active": "33259f6d2a8e1958",
   "lastOpenFiles": [
-    "Карта сервисов.md",
     "architecture/Платформа.canvas",
+    "api-gateway/avatars.md",
+    "elph-chat-server/room-avatars.md",
+    "Карта сервисов.md",
     "architecture/Обзор архитектуры.md",
     "elph-bot-jarvis/elph-bot-jarvis.canvas",
     "api-gateway/api-gateway.canvas",
@@ -228,8 +223,6 @@
     "elph-bot-jarvis",
     "api-gateway",
     "elph-user-status.md",
-    "platform-contracts.md",
-    "helm-charts-elph.md",
-    "elph-bot-service.md"
+    "platform-contracts.md"
   ]
 }

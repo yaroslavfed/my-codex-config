@@ -13,6 +13,7 @@ type: service
 ## Темы
 
 - [[elph-chat-server/messages|Сообщения]] — отправка, дельта обновлений и нормализация
+- [[elph-chat-server/room-avatars|Аватары комнат]] — GetAvatar, правила доступа к директам и звонкам
 - [[elph-chat-server/inline-commands|Inline-команды]] — исполнение команд и порядок событий
 - [[elph-chat-server/bot-tokens|Бот-токены]] — выдача, проверка и выгрузка токенов
 
